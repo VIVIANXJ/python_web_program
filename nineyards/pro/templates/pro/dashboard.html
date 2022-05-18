@@ -1,0 +1,403 @@
+{% extends './info_base.html' %}
+{% load static %}
+
+{% block info_head %}
+<title>Dashboard</title>
+<style>
+    .info-container {
+        display: grid;
+        grid-template-columns: 40% auto;
+        grid-gap: 30px;
+        margin: 30px;
+    }
+    .actions-title {
+        background: linear-gradient(rgb(255, 131, 97), rgb(237, 175, 158));
+        color: white;
+        font-weight: bold;
+        font-size: 30px;
+        padding: 5px;
+        border-radius: 5px;
+        box-shadow: 0px 0px 3px rgb(100, 100, 100);
+        text-align: center;
+    }
+    .active-jobs {
+        color: white;
+        font-weight: bold;
+        font-size: 30px;
+        padding: 5px;
+        border-radius: 5px;
+        box-shadow: 0px 0px 3px rgb(100, 100, 100);
+        text-align: center;
+    }
+    .schedule-title {
+        background: linear-gradient(rgb(125, 214, 205), rgb(196, 222, 220));
+        color: white;
+        font-weight: bold;
+        font-size: 30px;
+        padding: 5px;
+        border-radius: 5px;
+        box-shadow: 0px 0px 3px rgb(100, 100, 100);
+        text-align: center;
+        position: relative;
+    }
+    .job-container {
+        background-color: rgb(241, 240, 235);
+        height: 270px;
+        overflow-y: auto;
+        margin-bottom: 30px;
+        padding: 10px 20px;
+    }
+    .week-container {
+        background-color: rgb(241, 240, 235);
+        height: 270px;
+        overflow-y: auto;
+        margin-bottom: 30px;
+    }
+    .job-button {
+        background-color: white;
+        border: 2px solid rgb(173, 173, 173);
+        border-radius: 10px;
+        font-size: 20px;
+        padding: 5px;
+        text-align: center;
+        margin: 10px;
+    }
+    .job-button.selected {
+        background-color: rgb(211, 211, 211);
+    }
+    .job-detail {
+        background-color: rgb(91, 162, 157);
+        color: white;
+        font-weight: bold;
+        border-radius: 5px;
+        padding: 7px;
+        position: absolute;
+        right: 10px;
+        top: 7px;
+        font-size: 15px;
+        text-decoration: none;
+    }
+    .action-container {
+        background-color: rgb(248, 248, 245);
+    }
+    #actions_today, #actions_tomorrow {
+        height: 270px;
+        overflow-y: auto;
+    }
+    .date {
+        margin-top: 20px;
+        margin-left: 10px;
+        font-size: 20px;
+    }
+    .action-but {
+        border: 2px solid rgb(173, 173, 173);
+        border-radius: 10px;
+        margin: 5px 10px;
+        display: flex;
+        height: 50px;
+        background-color: white;
+    }
+    .action-but a {
+        text-decoration: none;
+        color: black;
+    }
+    .status {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        margin: 8px;
+    }
+    .status-Red {
+        background-color: rgb(254, 112, 75);
+    }
+    .status-Yellow {
+        background-color: rgb(252, 228, 108);
+    }
+    .status-Blue {
+        background-color: rgb(12, 162, 25);
+    }
+    .action-name {
+        border-right: 2px solid rgb(173, 173, 173);
+    }
+    .action-name {
+        width: 220px;
+        font-size: 20px;
+        padding: 10px;
+    }
+    .action-date {
+        font-size: 20px;
+        padding: 10px;
+    }
+    .link-Blue > span {
+        text-decoration: line-through;
+    }
+    .week-container {
+        overflow-y: auto;
+    }
+    #week_table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    #week_table td {
+        background-color: transparent;
+        border: 2px solid white;
+        color: rgb(116, 211, 202);
+        font-weight: bold;
+        text-align: center;
+        padding: 5px;
+        font-size: 20px;
+        height: 40px;
+    }
+    #week_table td.selected {
+        background-color: rgb(116, 211, 202);
+        color: white;
+    }
+    .week-start {
+        background-color: white;
+        border-radius: 10px;
+        color:rgb(125, 214, 205);
+        font-weight: bold;
+        position: absolute;
+        left: 20px;
+        top: 12px;
+        font-size: 15px;
+        padding: 3px 10px;
+    }
+</style>
+{% endblock %}
+
+{% block info_body %}
+<div class="info-container">
+    <div class="action-container">
+        <div class="actions-title">Actions Overview</div> <!-- Actions Overview -->
+        <div class="date">{{ today }}</div>
+        <div id="actions_today"></div>
+        <div class="date">{{ tomorrow }}</div>
+        <div id="actions_tomorrow"></div>
+    </div>
+    <div>
+        <div class="active-jobs blue">Active Jobs</div> <!-- Active Jobs -->
+        <div class="job-container">
+            
+        </div>
+        <div class="schedule-title"> <!-- Schedule -->
+            <div class="week-start">{{ week_start }}</div>
+            Schedule
+            <a class="job-detail">Show Detail</a>
+        </div>
+        <div class="week-container">
+            <table id="week_table">
+                <tr>
+                    <td>M</td>
+                    <td>T</td>
+                    <td>W</td>
+                    <td>Th</td>
+                    <td>F</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block info_script %}
+<script>
+    const usertype = '{{ user.userprofile.usertype }}';
+    const user_id = {{ user.pk }};
+    const jobs = [ // Job信息
+        {% for job in jobs %}
+        {
+            name: '{{ job.name }}',
+            pk: {{ job.pk }},
+            manager_id: [],
+            manager_name: [],
+            client_id: [],
+            url: '{% url 'jobdetail' job.pk %}'
+        },
+        {% endfor %}
+    ];
+    const jobmanagers = [
+        {% for jm in jobmanagers %}
+        {
+            job_id: {{ jm.job_id }},
+            manager_id: {{ jm.manager_id }},
+            manager_name: '{{ jm.manager.username }}'
+        },
+        {% endfor %}
+    ];
+    const jobclients = [
+        {% for jc in jobclients %}
+        {
+            job_id: {{ jc.job_id }},
+            client_id: {{ jc.client_id }}
+        },
+        {% endfor %}
+    ];
+    for (let job of jobs) {
+        for (let jm of jobmanagers) {
+            if (job.pk === jm.job_id) {
+                job.manager_id.push(jm.manager_id);
+                job.manager_name.push(jm.manager_name);
+            }
+        }
+        for (let jc of jobclients) {
+            if (job.pk === jc.job_id) {
+                job.client_id.push(jc.client_id);
+            }
+        }
+    }
+    const phases = [
+        {% for phase in phases %}
+        {
+            pk: {{ phase.pk }},
+            name: '{{ phase.name}}'
+        },
+        {% endfor %}
+    ];
+    const actions = [ // action information
+        {% for action in actions %}
+        {
+            pk: {{ action.pk }},
+            name: '{{ action.name }}',
+            job_id: {{ action.job_id }},
+            start_date: '{{ action.start_date|date:"Y-m-d" }}',
+            due_date: '{{ action.due_date|date:"Y-m-d" }}',
+            person_in_charge: [],
+            status: '{{ action.status }}',
+            url: '{% url 'actiondetail' action.pk %}',
+            mine: false
+        },
+        {% endfor %}
+    ];
+    const actionmembers = [
+        {% for am in actionmembers %}
+        {
+            action_id: {{ am.action_id }},
+            member_id: {{ am.person_in_charge_id }}
+        },
+        {% endfor %}
+    ];
+    for (let action of actions) {
+        for (let am of actionmembers) {
+            if (action.pk === am.action_id) {
+                action.person_in_charge.push(am.member_id);
+            }
+        }
+    }
+    console.log('actions', actions);
+    console.log('jobs', jobs);
+    for (let job of jobs) {
+        $(`#job_${job.pk} td:nth-child(2)`).html(job.manager_name.join(', '));
+    }
+    const valInArray = (val, arr) => {
+        for (let v of arr) {
+            if (val == v) return true;
+        }
+        return false;
+    }
+    const action_details = [ // 用于Schedule的action的信息
+        {% for det in action_details %}
+        {
+            start: {{ det.start }},
+            end: {{ det.end }}
+        },
+        {% endfor %}
+    ];
+    for (let i = 0; i < actions.length; i++) {
+        actions[i].det = action_details[i];
+    }
+    for (let i = 0; i < jobs.length; i++) { // Get users related jobs and actions
+        const job = jobs[i];
+        if (usertype === 'Manager' && !valInArray(user_id, job.manager_id)) {
+            $(`#job_${job.pk}`).css("display", "none");
+            continue;
+        }
+        if (usertype === 'Client' && !valInArray(user_id, job.client_id)) {
+            $(`#job_${job.pk}`).css("display", "none");
+            continue;
+        }
+        if (usertype === 'Team Member') {
+            let found = false;
+            for (let action of actions) {
+                if (action.job_id === job.pk) {
+                    if (valInArray(user_id, action.person_in_charge)) {
+                        found = true;
+                        action.mine = true;
+                        // break;
+                    }
+                }
+            }
+            if (!found)
+                continue;
+        }
+        if (usertype === 'Manager' || usertype === 'Client') {
+            for (let action of actions) {
+                if (action.job_id === job.pk) {
+                    action.mine = true;
+                }
+            }
+        }
+        $(".job-container").append(`<div class="job-button" id="job_${i}" onclick="jobSchedule(${i});">${job.name}</div>`);
+    }
+    if (usertype === 'Team Member') {
+        $(".job-container").append(`<div class="job-button" id="job_0" onclick="jobSchedule(-1);">All Jobs</div>`);
+    }
+
+    for (let action of actions) { // Get today's and tomorrow's actions
+        if (!action.mine)
+            continue;
+        const ele = $(`
+            <div class="action-but">
+                <div class="status status-${action.status}"></div>
+                <div class="action-name">
+                    <a href="${action.url}" class="link-${action.status}">
+                        <span>${action.name}</span>
+                    </a>
+                </div>
+                <div class="action-date">${action.due_date}</div>
+            </div>
+        `);
+        if (action.due_date == '{{ today }}')
+            $("#actions_today").append(ele);
+        if (action.due_date >= '{{ tomorrow }}')
+            $("#actions_tomorrow").append(ele);
+    }
+    const week_start = {{ week_start_ts }};
+    const jobSchedule = (id) => { // 显示Job的schedule
+        console.log(id, $(`#job_${id}`));
+        $(".job-button").removeClass("selected");
+        $(`#job_${id >= 0 ? id : 0}`).addClass("selected");
+        if (id >= 0) {
+            $(".job-detail").attr("href", jobs[id].url);
+            $(".job-detail").css("display", "inline-block");
+        }
+        else {
+            $(".job-detail").css("display", "none");
+        }
+        console.log(week_start);
+        $("#week_table .action-info").remove();
+        for (let action of actions) {
+            if (!action.mine) continue;
+            if (id !== -1 && action.job_id !== jobs[id].pk) continue;
+            if (action.status == 'Blue') continue;
+            // console.log(action.det.start, action.det.end);
+            if (action.det.end < week_start || action.det.start >= week_start + 5) continue;
+            console.log(action.det.start, action.det.end);
+            const disp_st = action.det.start > week_start ? action.det.start : week_start;
+            const disp_ed = action.det.end < week_start + 4 ? action.det.end : week_start + 4;
+            const ele = $(`
+                <tr class="action-info">
+                    <td></td><td></td><td></td><td></td><td></td>
+                </tr>
+            `);
+            const tds = ele.find("td");
+            for (let i = week_start; i < week_start + 5; i++) {
+                if (i >= disp_st && i <= disp_ed) {
+                    $(tds[i - week_start]).addClass("selected");
+                }
+            }
+            $("#week_table").append(ele);
+        }
+    }
+</script>
+{% endblock %}

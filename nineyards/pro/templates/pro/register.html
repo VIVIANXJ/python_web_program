@@ -1,0 +1,100 @@
+{% extends './base.html' %}
+{% load static %}
+
+{% block head %}
+<!-- Register Page -->
+<title>Register</title>
+<style>
+    .logo-container {
+        text-align: center;
+    }
+    .logo {
+        width: 600px;
+    }
+    form, form * {
+        background-color: rgb(232, 232, 232);
+    }
+    form {
+        width: 700px;
+        border-radius: 20px;
+        padding: 20px;
+    }
+    .register-title {
+        text-align: center;
+        font-size: 40px;
+    }
+    .input-container {
+        text-align: center;
+    }
+    input, select {
+        width: 320px;
+    }
+    input:focus {
+        outline: none;
+    }
+    .left-pad {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div>
+    <div class="logo-container">
+        <img class="logo" src="{% static 'image/logo.png' %}">
+    </div>
+    <form method="post">
+        <div class="register-title">Register with us.</div>
+        <div class="input-container">
+            <input type="text" placeholder="Account" required name="account" value="{{ account }}">
+            <button class="yellow" style="position: absolute;" id="check_account">Check</button>
+        </div>
+        <div class="input-container">
+            <input type="text" placeholder="Firstname" required name="firstname" value="{{ firstname }}">
+        </div>
+        <div class="input-container">
+            <input type="text" placeholder="Lastname" required name="lastname" value="{{ lastname }}">
+        </div>
+        <div class="input-container">
+            <select name="usertype">
+                <option value="Client">Client</option>
+                <option value="Team member">Team member</option>
+                <option value="Manager">Manager</option>
+            </select>
+        </div>
+        <div class="input-container">
+            <input type="password" placeholder="password" required name="password">
+        </div>
+        <div class="input-container">
+            <input type="password" placeholder="confirm_password" required name="confirm_password">
+        </div>
+        <div class="input-container">
+            <button type="submit" class="blue" style="padding:8px 20px">Sign Up</button>
+        </div>
+        <div class="input-container">
+            Already have a account? <a href="{% url 'login' %}">Log in here.</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    $("#check_account").click(function(e) { // Determine whether there is already have a same account
+        $.post("{% url 'register' %}", { check: $("[name='account']").val() },
+        (data) => {
+            $("[name='account']").css("border-color", data.status == 'exist' ? "red" : "green");
+        });
+        e.preventDefault();
+    });
+    $("[type='submit']").click(function(e) { //Determine whether the two passwords entered are the same
+        const pass = $("[name='password']").val();
+        const conf_pass = $("[name='confirm_password']").val();
+        if (pass !== conf_pass) {
+            $("[name='password']").css("border-color", "red");
+            $("[name='confirm_password']").css("border-color", "red");
+            e.preventDefault();
+        }
+    });
+</script>
+{% endblock %}

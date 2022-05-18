@@ -1,0 +1,70 @@
+{% extends './base.html' %}
+{% load static %}
+
+{% block head %}
+<!-- In addition to the login and register pages, other pages use this
+     template to add buttons to display the navigation bar -->
+<style>
+    .info-pad {
+        display: inline-block;
+        height: 800px;
+        /* width: 1600px; */
+        background-color: white;
+        padding: 10px;
+    }
+    .info-logo-container {
+        background-color: rgb(241, 241, 241);
+        border-radius: 5px;
+        float: right;
+        padding: 5px;
+    }
+    .info-logo-container > img {
+        width: 200px;
+    }
+    .logo-but-container {
+        overflow: auto;
+    }
+    .logo-but-container .three-but {
+        font-weight: bold;
+        display: inline-block;
+        font-size: 25px;
+        background-color: transparent;
+    }
+</style>
+{% block info_head %}
+{% endblock %}
+{% endblock %}
+
+{% block body %}
+<div class="info-pad">
+    <div class="logo-but-container"> <!-- Navigation Bar Toggle -->
+        <div class="three-but">&#9776;</div>
+        <div class="info-logo-container">
+            <img src="{% static 'image/logo.png' %}">
+        </div>
+    </div>
+    {% block info_body %}
+    {% endblock %}
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    // Navigation Bar Toggle Logic
+    let left_pad_showed = false;
+    $(".logo-but-container .three-but").click(() => {
+        left_pad_showed = !left_pad_showed;
+        $(".left-pad").css("display", left_pad_showed ? "inline-block" : "none");
+    });
+    window.onload = () => {
+        const winwidth = window.innerWidth;
+        $(".info-pad").css("width", winwidth - 250 - 50 + "px");
+    };
+    $(window).resize(() => {
+        const winwidth = window.innerWidth;
+        $(".info-pad").css("width", winwidth - 250 - 50 + "px");
+    })
+</script>
+{% block info_script %}
+{% endblock %}
+{% endblock %}

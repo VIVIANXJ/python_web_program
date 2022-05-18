@@ -1,0 +1,78 @@
+{% extends './base.html' %}
+{% load static %}
+
+{% block head %}
+<!-- LOGIN PAGE -->
+<title>Login</title>
+<style>
+    .logo-container {
+        text-align: center;
+    }
+    .logo {
+        width: 600px;
+    }
+    form, form * {
+        background-color: rgb(232, 232, 232);
+    }
+    form {
+        width: 700px;
+        height: 500px;
+        border-radius: 20px;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+    .login-title {
+        text-align: center;
+        font-size: 40px;
+    }
+    .input-container {
+        text-align: center;
+    }
+    input, select {
+        width: 320px;
+    }
+    .left-pad {
+        display: none;
+    }
+    .signup-pad {
+        background-color: rgb(216, 216, 216);
+        border-radius: 5px;
+        color: blue;
+        text-align: right;
+        margin: 10px 0px;
+        padding: 3px;
+    }
+    .signup-pad a {
+        background-color: transparent;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div>
+    <div class="logo-container">
+        <img class="logo" src="{% static 'image/logo.png' %}">
+    </div>
+    <form method="post">
+        <div class="login-title">Log in here.</div>
+        <div class="input-container">
+            <input type="text" name="account" placeholder="account">
+        </div>
+        <div class="input-container">
+            <input type="password" name="password" placeholder="password">
+        </div>
+        <div class="input-container">
+            <button type="submit" class="blue" style="padding:8px 20px">Log in</button>
+        </div>
+    </form>
+    <div class="signup-pad">
+        Don't have an account? <a href="{% url 'register' %}">Sign up</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+{% endblock %}

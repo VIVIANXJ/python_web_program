@@ -1,0 +1,341 @@
+{% extends './info_base.html' %}
+{% load static %}
+
+{% block info_head %}
+<!-- edit Action page -->
+<title>Action Edit</title>
+<style>
+    .info-title {
+        background-color: rgb(196, 196, 196);
+        border-radius: 10px;
+        padding: 5px 50px;
+        font-weight: bold;
+        font-size: 25px;
+        display: inline-block;
+        transform: translateY(-20px);
+    }
+    .content-center {
+        text-align: center;
+        padding: 10px;
+    }
+    form {
+        background-color: rgb(229, 229, 229);
+        border-radius: 20px;
+        padding: 10px 200px;
+    }
+    .input-container {
+        border: 2px solid rgb(168, 168, 168);
+        background-color: white;
+        margin: 5px;
+        font-size: 20px;
+        text-align: left;
+        padding: 0px 10px;
+        font-size: 15px;
+    }
+    .input-container label {
+        font-weight: bold;
+    }
+    input {
+        margin: 0px;
+        border: none;
+        background-color: white;
+        color: black;
+        font-size: 15px;
+    }
+    input:focus {
+        border: none;
+        outline: none;
+    }
+    textarea {
+        border: 2px solid rgb(168, 168, 168);
+        border-radius: 10px;
+        width: 100%;
+        height: 150px;
+        padding: 10px;
+    }
+    textarea:focus {
+        outline: none;
+    }
+    select {
+        padding: 0px;
+        margin: 5px;
+        font-size: 15px;
+        border: none;
+        outline: none;
+        background-color: transparent;
+    }
+    .status {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        margin: 5px;
+        display: inline-block;
+    }
+    .status-Red {
+        background-color: rgb(254, 112, 75);
+    }
+    .status-Yellow {
+        background-color: rgb(252, 228, 108);
+    }
+    .status-Blue {
+        background-color: rgb(12, 162, 25);
+    }
+    .action-status-container {
+        border: 2px solid rgb(168, 168, 168);
+        background-color: white;
+        margin: 10px;
+        padding: 5px 10px;
+        font-size: 20px;
+        font-weight: bold;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        position: relative;
+    }
+    .action-status-title {
+        display: inline-block;
+    }
+    .action-status-cont {
+        display: inline-block;
+    }
+    .fa-play {
+        color: rgb(135, 127, 127);
+        position: absolute;
+        right: 10px;
+    }
+    .action-status-select-container {
+        position: absolute;
+        top: 100%;
+        left: 0px;
+        width: 100%;
+        background-color: rgba(220, 220, 220, .8);
+        display: none;
+    }
+    .action-status-select {
+        display: flex;
+        align-items: center;
+        padding: 5px;
+        border: 2px solid rgb(168, 168, 168);
+    }
+    .edit-member {
+        border-radius: 5px;
+        padding: 5px;
+        margin: 5px;
+        display: inline-block;
+        color: white;
+        font-weight: bold;
+    }
+    .member-container {
+        position: fixed;
+        left: 200%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        padding: 10px;
+        border-radius: 20px;
+        background-color: rgb(229, 229, 229);
+        border: 4px solid rgb(168, 168, 168);
+    }
+    .member-container select {
+        width: 200px;
+        height: 200px;
+        border: 2px solid rgb(168, 168, 168);
+    }
+    .member-container button {
+        margin: 5px;
+        padding: 5px;
+    }
+    .cur-members {
+        display: inline-block;
+        padding: 7px;
+        font-size: 18px;
+    }
+    .unchange-value {
+        background-color: rgba(0, 0, 0, 0);
+        width: 100%;
+        position: absolute;
+        top: 70px;
+        left: 0px;
+        height: 420px;
+    }
+    form {
+        position: relative;
+    }
+</style>
+{% endblock %}
+
+{% block info_body %}
+<div class="content-center">
+    <div class="info-title">
+        <span style="color: rgb(255, 101, 59)">E</span>dit <span style="color: rgb(65, 118, 247)">A</span>ction
+    </div>
+    <form method="post">
+        <input type="text" name="status" value="{{ action.status }}" style="display: none;">
+        <div class="action-status-container">
+            <div class="action-status-title">Action status:</div>
+            <div class="status status-Red"></div>
+            <div class="action-status-cont">Unfinished</div>
+            <span class="fa fa-play fa-rotate-90"></span>
+            <div class="action-status-select-container">
+                {% if user.userprofile.usertype == 'Manager' %}
+                    <div class="action-status-select">
+                        <div class="status status-Red"></div>
+                        <div class="action-status-cont">Unfinished</div>
+                    </div>
+                    <div class="action-status-select">
+                        <div class="status status-Yellow"></div>
+                        <div class="action-status-cont">Pending Review</div>
+                    </div>
+                    <div class="action-status-select">
+                        <div class="status status-Blue"></div>
+                        <div class="action-status-cont">Completed</div>
+                    </div>
+                {% else %}
+                    {% if action.status == 'Blue' %}
+                        <div class="action-status-select">
+                            <div class="status status-Blue"></div>
+                            <div class="action-status-cont">Completed</div>
+                        </div>
+                    {% else %}
+                        <div class="action-status-select">
+                            <div class="status status-Red"></div>
+                            <div class="action-status-cont">Unfinished</div>
+                        </div>
+                        <div class="action-status-select">
+                            <div class="status status-Yellow"></div>
+                            <div class="action-status-cont">Pending Review</div>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        {% if user.userprofile.usertype != 'Manager' %}
+        <div class="unchange-value"></div>
+        {% endif %}
+        <div class="input-container">
+            <label>Action name:</label>
+            <input type="text" value="{{ action.name }}" name="name">
+        </div>
+        <div style="margin: 10px;">
+            <textarea name="description">{{ action.description }}</textarea>
+        </div>
+        <div class="input-container">
+            <label>Person in charge:</label>
+            <div class="cur-members">
+                {% for mem in persons %}
+                    {{ mem.person_in_charge.userprofile.firstname }} {{ mem.person_in_charge.userprofile.lastname }}&nbsp;&nbsp;&nbsp;
+                {% endfor %}
+            </div>
+            {% if user.userprofile.usertype == 'Manager' %}
+            <div class="edit-member yellow">Edit</div>
+            {% endif %}
+        </div>
+        <div class="input-container">
+            <label>Category:</label>
+            <select name="category">
+                {% for category in categories %}
+                    <option value="{{ category.pk }}" {% if category == action.category %}selected{% endif %}>{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="member-container">
+            <div>
+                <select name="person_in_charge" multiple>
+                </select>
+            </div>
+            <div style="float: right">
+                <button class="yellow">Close</button>
+            </div>
+        </div>
+        <div class="input-container">
+            <label>Phase:</label>
+            <select name="phase">
+                {% for phase in phases %}
+                    <option value="{{ phase.pk }}" {% if phase == action.phase %}selected{% endif %}>{{ phase.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="input-container">
+            <label>Start date:</label>
+            <input type="date" value="{{ action.start_date|date:"Y-m-d" }}" name="start_date">
+        </div>
+        <div class="input-container">
+            <label>Due date:</label>
+            <input type="date" value="{{ action.due_date|date:"Y-m-d" }}" name="due_date">
+        </div>
+        <button type="submit" class="yellow" style="padding: 8px 20px;">Save</button>
+        <a href="{% url 'actiondetail' action.pk %}" class="close-link blue">Close</a>
+    </form>
+</div>
+{% endblock %}
+
+{% block info_script %}
+<script>
+    const bkhome = location.href.slice(-13);
+    if (bkhome == 'back=homepage') {
+        $(".close-link").attr("href", "{% url 'homepage' %}");
+    }
+
+    $(window).click(() => {
+        const before = $(".action-status-select-container").css("display", "none");
+    });
+    const members = [
+        {% for mem in team_members %}
+        {
+            pk: {{ mem.pk }},
+            name: '{{ mem.userprofile.firstname }} {{ mem.userprofile.lastname }}'
+        },
+        {% endfor %}
+    ];
+    const persons = [
+        {% for per in persons %}
+            {{ per.person_in_charge.pk }},
+        {% endfor %}
+    ];
+    console.log(persons);
+    for (let mem of members) {
+        let found = false;
+        for (let p of persons) {
+            if (p == mem.pk) {
+                found = true;
+                break;
+            }
+        }
+        console.log(mem.pk, persons, found);
+        $("[name='person_in_charge']").append(`<option value="${mem.pk}" ${found ? 'selected' : ''}>${mem.name}</option>`);
+    }
+    $(".action-status-container .fa-play").click(function(e) {
+        const before = $(".action-status-select-container").css("display");
+        $(".action-status-select-container").css("display", before === "block" ? "none" : "block");
+        $(".action-status-container .fa-play").css("color", before === "block" ? "rgb(135, 127, 127)" : "rgb(254, 108, 69)");
+        e.stopPropagation();
+    });
+    $(".action-status-select").click(function(e) {
+        const col = $(this).find(".status");
+        const cont = $(this).find(".action-status-cont").html();
+        const sel_col = $(".action-status-container > .status");
+        const sel_cont = $(".action-status-container > .action-status-cont");
+        sel_col.attr("class", col.attr("class"));
+        const status = col.attr("class");
+        $("[name='status']").val(status.slice(status.indexOf('status-') + 7));
+        sel_cont.html(cont);
+    });
+    let showed = false;
+    function showEditMember(event) {
+        showed = !showed;
+        $(".member-container").css("left", showed ? "50%" : "200%");
+        event.preventDefault();
+    };
+    $("[name='person_in_charge']").change(() => {
+        let txt = '';
+        for (let opt of $("[name='person_in_charge'] option")) {
+            opt = $(opt);
+            if (opt.is(':selected')) {
+                txt += opt.text() + '&nbsp;&nbsp;&nbsp;';
+            }
+        }
+        $(".cur-members").html(txt);
+    })
+    $(".edit-member").click(showEditMember);
+    $(".member-container button").click(showEditMember);
+</script>
+{% endblock %}

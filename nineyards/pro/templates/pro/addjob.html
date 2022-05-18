@@ -1,0 +1,686 @@
+{% extends './info_base.html' %}
+{% load static %}
+
+{% block info_head %}
+<!-- Add Job Page -->
+<title>Add Job</title>
+<style>
+    form {
+        background-color: rgb(241, 240, 235);
+        border-radius: 20px;
+        margin: 20px;
+        padding: 20px;
+    }
+    form > div:first-child {
+        margin: auto;
+        width: 500px;
+    }
+    input {
+        margin: 0px;
+        padding: 0px;
+        border: none;
+        outline: none;
+        background-color: transparent;
+        color: black;
+    }
+    input:focus {
+        outline: none;
+    }
+    select {
+        color: black;
+    }
+    .job-name-container {
+        background-color: rgb(254, 116, 82);
+        border-radius: 10px;
+        font-size: 25px;
+        padding: 10px;
+        margin: 5px;
+    }
+    .job-name-container label {
+        font-weight: bold;
+    }
+    .job-name-container input {
+        color: black;
+    }
+    .client-name-container {
+        background-color: rgb(196, 196, 196);
+        border-radius: 10px;
+        font-size: 22px;
+        padding: 8px;
+        font-weight: bold;
+        margin: 5px;
+        margin-left: 30px;
+        position: relative;
+    }
+    .client-name-container > label {
+        color: white;
+    }
+    option:hover {
+        background-color: red;
+    }
+    .client-name-container select {
+        padding: 0px;
+        margin: 0px;
+        border: none;
+        outline: none;
+        background-color: transparent;
+        color: white;
+        position: absolute;
+        right: 10px;
+        width: 200px;
+    }
+    .action-input-container {
+        background-color: rgb(214, 210, 209);
+        border-radius: 5px;
+        padding: 5px;
+        position: relative;
+    }
+    .action-input-container label {
+        color: white;
+        font-weight: bold;
+    }
+    .action-input-container select {
+        border: none;
+        background-color: transparent;
+        padding: 0px;
+        margin: 0px;
+        font-size: 18px;
+    }
+    #new_action {
+        width: 100%;
+        background-color: rgb(225, 225, 225);
+        border-radius: 10px;
+        padding: 10px;  
+    }
+    .action-description {
+        border: 2px solid rgb(165, 160, 160);
+        border-radius: 10px;
+        height: 70px;
+        width: 100%;
+        padding: 10px;
+    }
+    .action-description:focus {
+        outline: none;
+    }
+    .action-simple-input-container {
+        display: grid;
+        grid-template-columns: auto auto auto;
+        grid-gap: 10px;
+    }
+    #actions_container {
+        height: 300px;
+        overflow-y: auto;
+        margin: 5px;
+        background-color: rgb(225, 225, 225);
+    }
+    .added-action-container {
+        width: 98%;
+        margin: 10px;
+        padding: 10px;
+        background-color: rgb(241, 240, 235);
+        border-radius: 10px;
+    }
+    #show_template {
+        position: absolute;
+        left: 100%;
+        top: -10px;
+        padding: 8px 20px;
+    }
+</style>
+<style>
+    form {
+        
+    }
+    .template-container {
+        background-color: rgb(241, 240, 235);
+        border-radius: 20px;
+        margin: 20px;
+        padding: 20px;
+        text-align: center;
+        display: none;
+    }
+    .info-title {
+        background-color: rgb(196, 196, 196);
+        border-radius: 10px;
+        padding: 5px 50px;
+        font-weight: bold;
+        font-size: 25px;
+        display: inline-block;
+    }
+    .phase-container {
+        display: grid;
+        grid-template-columns: 50% 50%;
+        height: 580px;
+        overflow-y: auto;
+    }
+    .phase {
+        border: 2px solid rgb(160, 160, 160);
+        border-radius: 7px;
+        margin: 5px;
+    }
+    .phase-header {
+        color: white;
+        font-weight: bold;
+        font-size: 20px;
+        border-radius: 5px;
+        box-shadow: 0px 0px 3px rgb(100, 100, 100);
+        text-align: center;
+        padding: 5px;
+        position: relative;
+    }
+    .add-action {
+        background-color: white;
+        height: 20px;
+        width: 40px;
+        border-radius: 10px;
+        position: absolute;
+        right: 10px;
+        top: 7px;
+        color: black;
+        font-size: 15px;
+    }
+    .phase-action-container {
+        height: 240px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    .phase-action {
+        display: grid;
+        grid-template-columns: 29% 19% 19% 33%;
+    }
+    .phase-color-0 {
+        background-color: rgb(254, 112, 75);
+    }
+    .phase-color-1 {
+        background-color: rgb(66, 118, 247);
+    }
+    .phase-color-2 {
+        background-color: rgb(116, 211, 202);
+    }
+    .phase-color-3 {
+        background-color: rgb(134, 128, 128);
+    }
+    .action-name, .action-category, .action-person {
+        border-right: 2px solid rgb(160, 160, 160);
+        position: relative;
+        padding: 5px 0px;
+    }
+    .action-due-date {
+        padding: 5px 0px;
+    }
+    .action-info {
+        border-radius: 5px;
+        background-color: rgb(196, 196, 196);
+        margin: 3px;
+        padding: 3px 0px;
+    }
+    .action-circle {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: rgb(196, 196, 196);
+        position: absolute;
+        top: 15px;
+        left: 5px;
+    }
+    .phase select, .phase select:focus, .phase input {
+        border: none;
+        outline: none;
+        background-color: transparent;
+        color: black;
+        font-size: 12px;
+        margin: 0px;
+        padding: 0px;
+        font-weight: normal;
+    }
+    #show_edit_phase {
+        position: absolute;
+        left: -140px;
+        top: -10px;
+    }
+    .list-edit-container {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        border: 2px solid black;
+        background-color: rgba(160, 160, 160, .8);
+        padding: 20px;
+        width: 500px;
+        border-radius: 10px;
+    }
+    .container-title {
+        background-color: rgb(241, 240, 235);
+        border-radius: 5px;
+        font-size: 30px;
+        padding: 10px;
+    }
+    .list-container {
+        background-color: white;
+        margin-top: 10px;
+    }
+    .list-item {
+        background-color: white;
+        position: relative;
+        font-size: 20px;
+        font-weight: bold;
+        padding: 5px 10px;
+    }
+    .list-item input {
+        border: none;
+        outline: none;
+        font-size: 20px;
+        padding: 0px;
+        margin: 0px;
+        color: black;
+        background-color: transparent;
+        width: 400px;
+    }
+    .remove-but {
+        color: white;
+        font-weight: bold;
+        padding: 0px 15px;
+        border-radius: 10px;
+        position: absolute;
+        right: 10px;
+        top: 5px;
+        background-color: rgb(255, 128, 96);
+    }
+    .item-input {
+        background-color: rgb(239, 239, 239);
+        position: relative;
+    }
+    .item-input input, .item-input input:focus {
+        border: none;
+        outline: none;
+        font-weight: bold;
+        background-color: transparent;
+        margin: 5px;
+        padding: 0px;
+        width: 380px;
+    }
+</style>
+{% endblock %}
+
+{% block info_body %}
+<!-- Edit Job form start -->
+<form method="post">
+    <div>
+        <div class="job-name-container">
+            <label>Job name:</label>
+            <input type="text" name="job_name" required>
+        </div>
+        <div class="client-name-container">
+            <label>Client name:</label>
+            <select name="client" required>
+                {% for user in clients %}
+                    <option value="{{ user.pk }}">{{ user.username }}</option>
+                {% endfor %}
+            </select>
+            <button id="show_template" class="blue">Template</button>
+            <button id="show_edit_phase" class="blue">Edit Phase</button>
+        </div>
+    </div>
+    <div style="background-color: rgb(225, 225, 225); padding: 5px; border-radius: 20px; margin-bottom: 10px;">
+        <div id="actions_container"></div>
+    </div>
+    <div id="new_action">
+        <div class="action-simple-input-container">
+            <div class="action-input-container">
+                <label>Action name:</label>
+                <input type="text" id="action_name">
+            </div>
+            <div class="action-input-container">
+                <label>Start date:</label>
+                <input type="date" id="action_start_date">
+            </div>
+            <div class="action-input-container">
+                <label>Due date:</label>
+                <input type="date" id="action_due_date">
+            </div>
+            <div class="action-input-container">
+                <label>Phase: </label>
+                <select id="action_phase">
+                    {% for phase in phases %}
+                        <option value="{{ phase.pk }}">{{ phase.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="action-input-container">
+                <label>Person in charge: </label>
+                <select id="action_person_in_charge">
+                    {% for user in team_members %}
+                        <option value="{{ user.pk }}">{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="action-input-container">
+                <label>Category:</label>
+                <select id="action_category">
+                    {% for category in categories %}
+                        <option value="{{ category.pk }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 80% 20%; width: 100%; margin-top: 10px;">
+            <div style="width: 100%;">
+                <textarea id="action_description" class="action-description"></textarea>
+            </div>
+            <button id="add_action" class="yellow">Add Action</button>
+        </div>
+    </div>
+    <div style="text-align: center;">
+        <button type="submit" class="blue" style="padding: 8px 20px;">OK</button>
+    </div>
+</form>
+<!-- Edit Job form end -->
+<!-- Phase template page start -->
+<div class="template-container">
+    <div class="info-title">
+        <span style="color: rgb(255, 101, 59)">P</span>hase <span style="color: rgb(65, 118, 247)">T</span>emplate
+    </div>
+    <div class="phase-container">
+    </div>
+    <button class="blue" style="padding: 8px 20px" onclick="updateTemplate();">Save</button>
+    <button class="yellow" style="padding: 8px 20px" onclick="closeTemplate();">Cancel</button>
+</div>
+<div id="list_container_pad"></div>
+<!-- Phase template page end -->
+{% endblock %}
+
+{% block info_script %}
+<script>
+    let action_cnt = 0;
+    const addJobAction = (name, start_date, due_date, phase, person, category, description) => {
+        // Add action
+        // We can enter the action information directly, or add it through the phase template
+        // The common part of the two methods
+        const ele = $(`
+            <div class="added-action-container">
+                <div class="action-simple-input-container">
+                    <div class="action-input-container">
+                        <label>Action name:</label>
+                        <input type="text" name="action_name_${action_cnt}" value="${name}" required>
+                    </div>
+                    <div class="action-input-container">
+                        <label>Start date:</label>
+                        <input type="date" name="action_start_date_${action_cnt}" value="${start_date}" required>
+                    </div>
+                    <div class="action-input-container">
+                        <label>Due date:</label>
+                        <input type="date" name="action_due_date_${action_cnt}" value="${due_date}" required>
+                    </div>
+                    <div class="action-input-container">
+                        <label>Phase: </label>
+                        <select name="action_phase_${action_cnt}" required>
+                            ${$("#action_phase").html()}
+                        </select>
+                    </div>
+                    <div class="action-input-container">
+                        <label>Person in charge: </label>
+                        <select name="action_person_in_charge_${action_cnt}" required>
+                            ${$("#action_person_in_charge").html()}
+                        </select>
+                    </div>
+                    <div class="action-input-container">
+                        <label>Category:</label>
+                        <select name="action_category_${action_cnt}" required>
+                            ${$("#action_category").html()}
+                        </select>
+                    </div>
+                </div>
+                <textarea name="action_description_${action_cnt}" class="action-description" style="margin: 10px 0px;">${description}</textarea>
+            </div>
+        `);
+        ele.find(`[name="action_phase_${action_cnt}"] option[value="${phase}"]`).attr("selected", true);
+        ele.find(`[name="action_person_in_charge_${action_cnt}"] option[value="${person}"]`).attr("selected", true);
+        ele.find(`[name="action_category_${action_cnt}"] option[value="${category}"]`).attr("selected", true);
+        $("#actions_container").append(ele);
+        action_cnt++;
+    };
+    $("#add_action").click(() => {
+       addJobAction(
+           $("#action_name").val(),
+           $("#action_start_date").val(),
+           $("#action_due_date").val(),
+           $("#action_phase").val(),
+           $("#action_person_in_charge").val(),
+           $("#action_category").val(),
+           $("#action_description").val()
+        );
+        return false;
+    });
+</script>
+<script>
+    let phases = {
+        {% for phase in phases %}
+            {{ phase.pk }} : '{{ phase.name }}',
+        {% endfor %}
+    };
+    const actions = [
+        {% for action in actions %}
+        {
+            pk: {{ action.pk }},
+            phase: {{ action.phase_id }},
+            name: '{{ action.name }}',
+            person: {{ action.person_in_charge.pk|default:0 }},
+            category: {{ action.category.pk|default:0 }},
+            due_date: '{{ action.due_date|date:"Y-m-d" }}'
+        },
+        {% endfor %}
+    ];
+    const categories = [
+        {% for category in categories %}
+        {
+            pk: {{ category.pk }},
+            name: '{{ category.name }}'
+        },
+        {% endfor %}
+    ];
+    const users = [
+        {% for user in team_members %}
+        {
+            pk: {{ user.pk }},
+            name: '{{ user.username }}'
+        },
+        {% endfor %}
+    ];
+    const showActionTemplate = (cont, action) => { // An action is displayed in the Phase Template
+        cont.append(`
+            <div class="phase-action">
+                <div class="action-name">
+                    <div class="action-circle"></div>
+                    <div class="action-info" style="margin-left: 20px;">
+                        <input type="text" value="${action.name}" name="action_name_${action.pk}">
+                    </div>
+                </div>
+                <div class="action-category">
+                    <div class="action-info">
+                        <select name="action_category_${action.pk}">
+                            ${'<option value="0">---</option>' + categories.map(ele => {
+                                if (ele.pk === action.category)
+                                    return `<option value="${ele.pk}" selected>${ele.name}</option>`;
+                                else
+                                    return `<option value="${ele.pk}">${ele.name}</option>`;
+                            }).join('')}
+                        </select>
+                    </div>
+                </div>
+                <div class="action-person">
+                    <div class="action-info">
+                        <select name="action_person_${action.pk}">
+                            ${'<option value="0">---</option>' + users.map(ele => {
+                                if (ele.pk === action.person)
+                                    return `<option value="${ele.pk}" selected>${ele.name}</option>`;
+                                else
+                                    return `<option value="${ele.pk}">${ele.name}</option>`;
+                            }).join('')}
+                        </select>
+                    </div>
+                </div>
+                <div class="action-due-date">
+                    <div class="action-info">
+                        <input type="date" style="width: 115px;" value="${action.due_date}" name="action_due_date_${action.pk}">
+                        <input type="checkbox" id="add_to_job_${action.pk}">
+                    </div>
+                </div>
+            </div>
+        `);
+    };
+
+    let ph_id = 0;
+    for (let k in phases) { // Add a phase in phase template
+        const ele = $(`
+            <div class="phase" id="phase_${k}">
+                <div class="phase-header phase-color-${ph_id}">
+                    ${phases[k]}
+                    <div class="add-action" onclick="addActionTemplate(${k})">+</div>
+                </div>
+                <div class="phase-action-container">
+                </div>
+            </div>
+        `);
+        const act_cont = ele.find(".phase-action-container");
+        ph_id = (ph_id + 1) % 4;
+        for (let action of actions) {
+            if (action.phase !== parseInt(k)) continue;
+            showActionTemplate(act_cont, action);
+        }
+        $(".phase-container").append(ele);
+    }
+    const addActionTemplate = (id) => { // Add a new action in phase
+        $.post(
+            "{% url 'phasetemplate' %}",
+            { id: id, },
+            (data) => {
+                actions.push({
+                    pk: data.id,
+                    phase: id,
+                    name: '',
+                    person_in_charge: null,
+                    category: null,
+                    due_date: null
+                });
+                showActionTemplate($(`#phase_${id} .phase-action-container`), actions[actions.length - 1]);
+            }
+        );
+    };
+
+    const updateTemplate = () => { // Save button
+        const form_info = { };
+        for (let action of actions) {
+            const name = $(`[name="action_name_${action.pk}"]`).val();
+            const category = $(`[name="action_category_${action.pk}"]`).val();
+            const person = $(`[name="action_person_${action.pk}"]`).val();
+            const due = $(`[name="action_due_date_${action.pk}"]`).val();
+            let add_to_job = $(`#add_to_job_${action.pk}`).is(":checked");
+            form_info[`action_name_${action.pk}`] = name;
+            form_info[`action_category_${action.pk}`] = category;
+            form_info[`action_person_${action.pk}`] = person;
+            form_info[`action_due_date_${action.pk}`] = due;
+            if (add_to_job)
+                addJobAction(name, null, due, action.phase, person, category, '');
+        }
+        $.post(
+            "{% url 'phasetemplate' %}",
+            form_info,
+            () => {
+                closeTemplate();
+            }
+        );
+    };
+    const closeTemplate = () => { // Close button
+        $(".template-container").css("display", "none");
+        $("form").css("display", "block");
+    }
+    function showTemplate(e) { // Template button
+        $(".template-container").css("display", "block");
+        $("form").css("display", "none");
+        e.preventDefault();
+    };
+    $("#show_template").click(showTemplate);
+</script>
+<script>
+    const addNewList = (id, title_html, show_but, init_data) => { // phase和category通用的编辑和删除框
+        const ele = $(`
+            <div class="list-edit-container" id="${id}" style="display: none">
+                <div class="container-title">
+                    ${title_html}
+                </div>
+                <div class="list-container">
+                    <div class="item-input">
+                        <input type="text" id="new_item_title">
+                        <div class="remove-but" id="add_but">+</div>
+                    </div>
+                </div>
+                <div style="text-align: center;">
+                    <button class="blue">Save</button>
+                    <button class="yellow">Close</button>
+                </div>
+            </div>
+        `);
+        $("#list_container_pad").append(ele);
+        ele.find(".yellow").click(() => {
+            ele.css("display", "none");
+        });
+        const addNewItem = (txt, pk) => {
+            const new_item = $(`
+                <div class="list-item" id="${pk ? pk : ""}"><input type="text" value="${txt}"><div class="remove-but">-</div></div>
+            `);
+            // ele.find(".list-container").append(new_item);
+            ele.find(".item-input").before(new_item);
+            new_item.find(".remove-but").click(function() {
+                console.log('reomve');
+                const ele = $(this).parent();
+                ele.remove();
+            });
+        }
+        for (let info of init_data) {
+            addNewItem(info.name, info.pk);
+        }
+        ele.find(".blue").click(() => {
+            ele.css("display", "none");
+            const info = [];
+            const item_list = $(`#${id} .list-item`);
+            for (let ele of item_list) {
+                const pk = $(ele).attr("id");
+                const name = $(ele).find("input").val();
+                info.push({
+                    pk: pk ? pk : 0,
+                    name: name
+                })
+            }
+            const form_dat = {};
+            form_dat[id] = JSON.stringify(info);
+            console.log(info);
+            $.post(
+                "{% url 'jobdetail' 0 %}",
+                form_dat,
+                () => {
+                    location.reload();
+                }
+            );
+        });
+        console.log(show_but);
+        show_but.click(function(e) {
+            ele.css("display", "block");
+            console.log(e);
+            e.preventDefault();
+        });
+        ele.find("#add_but").click(() => {
+            const txt = ele.find("#new_item_title").val();
+            addNewItem(txt);
+        });
+    };
+    phases = [
+        {% for phase in phases %}
+        {
+            pk: {{ phase.pk }},
+            name: '{{ phase.name }}'
+        },
+        {% endfor %}
+    ];
+    addNewList("phase", "Phase List", $("#show_edit_phase"), phases);
+</script>
+{% endblock %}

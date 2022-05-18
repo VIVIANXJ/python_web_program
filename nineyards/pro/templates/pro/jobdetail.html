@@ -1,0 +1,513 @@
+{% extends './info_base.html' %}
+{% load static %}
+
+{% block info_head %}
+<title>Job Detail</title>
+<style>
+    .action-header {
+        display: grid;
+        grid-template-columns: 25% 25% 25% 25%;
+        margin: 10px 0px;
+    }
+    .action-header > div {
+        background-color: rgb(211, 211, 211);
+        font-size: 15px;
+        font-weight: bold;
+        margin: 3px;
+        padding: 5px;
+        text-align: center;
+        box-shadow: 1px 1px 3px rgb(100, 100, 100);
+    }
+    .action-header div:first-child {
+        border-top-left-radius: 10px;
+        border-bottom-left-radius: 10px;
+    }
+    .action-header div:last-child {
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+    }
+    .category-title {
+        background-color: rgb(116, 211, 202);
+        color: white;
+        font-weight: bold;
+        font-size: 20px;
+        padding: 5px;
+        border-radius: 3px;
+    }
+    .action {
+        background-color: rgb(247, 248, 244);
+        display: grid;
+        grid-template-columns: 25% 25% 25% 25%;
+        position: relative;
+    }
+    .action > div > div {
+        text-align: center;
+    }
+    a {
+        color: black;
+        text-decoration: none;
+    }
+    .status {
+        position: absolute;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        left: -25px;
+        top: 5px;
+    }
+    .status-Red {
+        background-color: rgb(254, 112, 75);
+    }
+    .status-Yellow {
+        background-color: rgb(252, 228, 108);
+    }
+    .status-Blue {
+        background-color: rgb(12, 162, 25);
+    }
+    .edit-but {
+        font-size: 15px;
+        padding: 5px;
+        margin: 5px;
+    }
+    .list-edit-container {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        border: 2px solid black;
+        background-color: rgba(160, 160, 160, .8);
+        padding: 20px;
+        width: 500px;
+        border-radius: 10px;
+    }
+    .container-title {
+        background-color: rgb(241, 240, 235);
+        border-radius: 5px;
+        font-size: 30px;
+        padding: 10px;
+    }
+    .list-container {
+        background-color: white;
+        margin-top: 10px;
+    }
+    .list-item {
+        background-color: white;
+        position: relative;
+        font-size: 20px;
+        font-weight: bold;
+        padding: 5px 10px;
+    }
+    .list-item input {
+        border: none;
+        outline: none;
+        font-size: 20px;
+        padding: 0px;
+        margin: 0px;
+        color: black;
+        background-color: transparent;
+        width: 400px;
+    }
+    .remove-but {
+        color: white;
+        font-weight: bold;
+        padding: 0px 15px;
+        border-radius: 10px;
+        position: absolute;
+        right: 10px;
+        top: 5px;
+        background-color: rgb(255, 128, 96);
+    }
+    .item-input {
+        background-color: rgb(239, 239, 239);
+        position: relative;
+    }
+    .item-input input, .item-input input:focus {
+        border: none;
+        outline: none;
+        font-weight: bold;
+        background-color: transparent;
+        margin: 5px;
+        padding: 0px;
+        width: 380px;
+    }
+</style>
+<style>
+    .dropbtn {
+        width: 200px;
+        background-color: rgb(255, 128, 96);
+        color: white;
+        padding: 8px;
+        font-size: 20px;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+        text-align: center;
+        font-size: 20px;
+        border-radius: 5px;
+    }
+    
+    .dropbtn:hover, .dropbtn:focus {
+        background-color: rgb(255, 128, 96);
+    }
+    
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: rgba(244, 243, 239, .8);
+        width: 200px;
+        overflow: auto;
+        border: 2px solid rgb(90, 90, 89);
+        box-shadow: 0px 3px 3px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+    }
+    
+    .dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+    }
+    
+    .dropdown a:hover {background-color: #ddd;}
+    
+    .show {display: block;}
+</style>
+    
+{% endblock %}
+
+{% block info_body %}
+<div>
+    <div style="text-align: center;">
+        <div class="dropdown">
+            <div onclick="myFunction()" class="dropbtn">{{ job.name }} <span class="fa fa-caret-down" style="float: right"></span></div>
+            <div id="myDropdown" class="dropdown-content">
+            </div>
+        </div>
+    </div>
+    {% if user.userprofile.usertype == 'Manager' %}
+    <div style="text-align: right; padding-right: 50px;">
+        <button class="yellow edit-but" id="show_edit_phase">Edit Phase</button>
+        <button class="yellow edit-but" id="show_edit_category">Edit Category</button>
+    </div>
+    {% endif %}
+    <div style="padding: 0px 30px;">
+        <div class="action-header">
+            <div>Actions</div>
+            <div>Person in charge</div>
+            <div>Phase</div>
+            <div>Due date</div>
+        </div>
+        <div id="actions">
+    </div>
+    <div style="text-align: center; padding-top: 20px;">
+        <a href="{% url 'homepage' %}" class="close-link blue">Close</a>
+    </div>
+</div>
+<div id="list_container_pad"></div>
+
+{% endblock %}
+
+{% block info_script %}
+<script>
+    /* When the user clicks on the button, 
+    toggle between hiding and showing the dropdown content */
+    function myFunction() {
+        document.getElementById("myDropdown").classList.toggle("show");
+    }
+    
+    // Close the dropdown if the user clicks outside of it
+    window.onclick = function(event) {
+      if (!event.target.matches('.dropbtn')) {
+    
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        var i;
+        for (i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      }
+    }
+    </script>
+<script>
+    const valInArray = (val, arr) => {
+        for (let v of arr) {
+            if (val == v) return true;
+        }
+        return false;
+    }
+    const user_id = {{ user.pk }};
+    const usertype = "{{ user.userprofile.usertype }}";
+    const actions = [ // action information
+        {% for action in actions %}
+        {
+            pk: {{ action.pk }},
+            name: '{{ action.name}}',
+            person_in_charge: [],
+            person_in_charge_name: [],
+            phase: '{{ action.phase.name }}',
+            category: '{{ action.category.name }}',
+            due_date: '{{ action.due_date|date:"d/m/Y" }}',
+            detail_url: '{% url 'actiondetail' action.pk %}',
+            comment_url: '{% url 'addcomment' action.pk %}',
+            edit_url: '{% url 'editaction' action.pk %}',
+            delete_url: '{% url 'actiondelete' action.pk %}',
+            status: '{{ action.status }}',
+            manager: '{{ action.job.manager.pk }}',
+            job_id: {{ action.job.pk }}
+        },
+        {% endfor %}
+    ];
+    const fullactions = [
+    {% for action in fullactions %}
+        {
+            pk: {{ action.pk }},
+            person_in_charge: [],
+            job_id: {{ action.job.pk }}
+        },
+        {% endfor %}
+    ]
+    const actmems = [
+        {% for am in actionmembers %}
+        {
+            action: '{{ am.action_id }}',
+            member: '{{ am.person_in_charge_id }}',
+            member_name: '{{ am.person_in_charge.userprofile.firstname }} {{ am.person_in_charge.userprofile.lastname }}'
+        },
+        {% endfor %}
+    ];
+    const jobmans = [
+        {% for jm in jobmanagers %}
+        {{ jm.manager_id }},
+        {% endfor %}
+    ];
+    const fulljobmans = [
+        {% for jm in fulljobmans %}
+        {
+            job_id: {{ jm.job_id }},
+            man_id: {{ jm.manager_id }},
+        },
+        {% endfor %}
+    ];
+    const fulljobclts = [
+        {% for jc in fulljobclts %}
+        {
+            job_id: {{ jc.job_id }},
+            clt_id: {{ jc.client_id }},
+        },
+        {% endfor %}
+    ];
+    const jobs = [
+        {% for job in jobs %}
+        {
+            url: "{% url 'jobdetail' job.pk %}",
+            name: "{{ job.name }}",
+            id: "{{ job.id }}"
+        },
+        {% endfor %}
+    ];
+    for (let am of actmems) {
+        for (let act of actions) {
+            if (act.pk === parseInt(am.action)) {
+                act.person_in_charge.push(am.member);
+                act.person_in_charge_name.push(am.member_name);
+                break;
+            }
+        }
+        for (let act of fullactions) {
+            if (act.pk === parseInt(am.action)) {
+                act.person_in_charge.push(am.member);
+                break;
+            }
+        }
+    }
+    for (let job of jobs) {
+        let myjob = false;
+        if (usertype == 'Manager') {
+            for (let jm of fulljobmans) {
+                if (jm.job_id == job.id && jm.man_id == user_id) {
+                    myjob = true;
+                    break;
+                }
+            }
+        }
+        else if (usertype == 'Client') {
+            for (let jc of fulljobclts) {
+                if (jc.job_id == job.id && jc.clt_id == user_id) {
+                    myjob = true;
+                    break;
+                }
+            }
+        }
+        else {
+            for (let action of fullactions) {
+                if (action.job_id != job.id) continue;
+                console.log(job.id, action.job_id, action.person_in_charge, user_id);
+                let f = false;
+                for (let p of action.person_in_charge) {
+                    if (p == user_id) {
+                        f = true;
+                        break;
+                    }
+                }
+                if (f) myjob = true;
+            }
+        }
+        console.log(myjob);
+        if (myjob)
+            $("#myDropdown").append(`<a href="${job.url}">${job.name}</a>`);
+    }
+    console.log('full actions', fullactions);
+    const categories = {};
+    for (let action of actions) {
+        if (!(action.category in categories)) {
+            categories[action.category] = [];
+        }
+        categories[action.category].push(action);
+    }
+    for (let category in categories) { // 显示Category和该Category的action信息
+        $("#actions").append(`
+            <div class="category-title">${category}</div>
+        `);
+        for (let action of categories[category]) {
+            const can_edit = valInArray(user_id, action.person_in_charge) || valInArray(user_id, jobmans);
+            console.log(user_id, action.person_in_charge, jobmans);
+            $("#actions").append(`
+                <div class="action">
+                    <div class="status status-${action.status}"></div>
+                    <div style="padding: 5px; padding-right: 0px;">
+                        <div style="border-top-left-radius: 7px;border-bottom-left-radius: 7px;border: 2px solid black;">
+                            ${action.name}
+                        </div>
+                    </div>
+                    <div style="padding: 5px 0px;">
+                        <div style="border-top: 2px solid black; border-bottom: 2px solid black; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; ">
+                            ${action.person_in_charge_name.join(', ')}
+                        </div>
+                    </div>
+                    <div style="padding: 5px 0px;">
+                        <div style="border-top: 2px solid black; border-bottom: 2px solid black; border-left: 2px solid black;">
+                            ${action.phase}
+                        </div>
+                    </div>
+                    <div style="padding: 5px 0px;">
+                        <div style="border-top-right-radius: 7px;border-bottom-right-radius: 7px;border: 2px solid black; display: inline-block; width: 150px; margin-right: 20px;">
+                            ${action.due_date}
+                        </div>
+                        <a href="${action.detail_url}"><span class="fa fa-eye"></span></a>
+                        <a href="${action.edit_url}" style="display: ${can_edit ? "inline-block" : "none"}"><span class="fa fa-edit"></span></a>
+                        <a href="${action.comment_url}"><span class="fa fa-comment-o"></span></a>
+                        <span class="fa fa-trash-o" url="${action.delete_url}" style="display: ${user_id in jobmans || user_id == jobmans ? "inline-block" : "none"}"></span>
+                    </div>
+                </div>
+            `);
+        }
+    }
+    $(".fa-trash-o").click(function() {
+        $.get($(this).attr("url"), () => {
+            location.reload();
+        })
+    });
+
+</script>
+<script>
+    const addNewList = (id, title_html, show_but, init_data) => { // phase和category通用的编辑和删除框
+        const ele = $(`
+            <div class="list-edit-container" id="${id}" style="display: none">
+                <div class="container-title">
+                    ${title_html}
+                </div>
+                <div class="list-container">
+                    <div class="item-input">
+                        <input type="text" id="new_item_title">
+                        <div class="remove-but" id="add_but">+</div>
+                    </div>
+                </div>
+                <div style="text-align: center;">
+                    <button class="blue">Save</button>
+                    <button class="yellow">Close</button>
+                </div>
+            </div>
+        `);
+        $("#list_container_pad").append(ele);
+        ele.find(".yellow").click(() => {
+            ele.css("display", "none");
+        });
+        const addNewItem = (txt, pk) => {
+            const new_item = $(`
+                <div class="list-item" id="${pk ? pk : ""}"><input type="text" value="${txt}"><div class="remove-but" style="display: none">-</div></div>
+            `);
+            // ele.find(".list-container").append(new_item);
+            ele.find(".item-input").before(new_item);
+            new_item.find(".remove-but").click(function() {
+                console.log('reomve');
+                const ele = $(this).parent();
+                ele.remove();
+            });
+        }
+        for (let info of init_data) {
+            addNewItem(info.name, info.pk);
+        }
+        ele.find(".blue").click(() => {
+            ele.css("display", "none");
+            const info = [];
+            const item_list = $(`#${id} .list-item`);
+            for (let ele of item_list) {
+                const pk = $(ele).attr("id");
+                const name = $(ele).find("input").val();
+                info.push({
+                    pk: pk ? pk : 0,
+                    name: name
+                })
+            }
+            const form_dat = {};
+            form_dat[id] = JSON.stringify(info);
+            console.log(info);
+            $.post(
+                "{% url 'jobdetail' job.pk %}",
+                form_dat,
+                () => {
+                    location.reload();
+                }
+            );
+        });
+        show_but.click(() => {
+            ele.css("display", "block");
+        });
+        ele.find("#add_but").click(() => {
+            const txt = ele.find("#new_item_title").val();
+            addNewItem(txt);
+        });
+    };
+
+    const phases = [
+        {% for phase in phases %}
+        {
+            pk: {{ phase.pk }},
+            name: '{{ phase.name }}'
+        },
+        {% endfor %}
+    ];
+
+    const cats = [
+        {% for category in categories %}
+        {
+            pk: {{ category.pk }},
+            name: '{{ category.name }}'
+        },
+        {% endfor %}
+    ];
+
+    addNewList("phase", "Phase List", $("#show_edit_phase"), phases);
+    addNewList("category", "Category List", $("#show_edit_category"), cats);
+</script>
+{% endblock %}
