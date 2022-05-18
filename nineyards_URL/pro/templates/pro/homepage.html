@@ -1,0 +1,608 @@
+{% extends './info_base.html' %}
+{% load static %}
+
+{% block info_head %}
+<title>Homepage</title>
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<style>
+    .info {
+        background-color: rgb(241, 240, 235);
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px;
+        height: 700px;
+    }
+    #job_table {
+        font-weight: bold;
+        border-collapse: collapse;
+        width: 100%;
+    }
+    #job_table td, #job_table th {
+        border: 2px solid #dddddd;
+        text-align: center;
+        padding: 3px;
+    }
+    #job_table th {
+        font-size: 25px;
+    }
+    #job_table td:nth-child(1) {
+        font-size: 25px;
+    }
+    #job_table tr:nth-child(odd) {
+        background-color: rgb(255, 242, 239);
+    }
+    #job_table tr:nth-child(even) {
+        background-color: rgb(254, 197, 183);
+    }
+    .link-but {
+        font-size: 15px;
+        border-radius: 5px;
+        background-color: white;
+        box-shadow: 3px 3px 3px rgb(100, 100, 100);
+        text-decoration: none;
+        padding: 1px 10px;
+        color: rgb(255, 128, 96);
+        font-weight: bold;
+        position: absolute;
+        right: 10px;
+        top: 7px;
+    }
+    .milestone-but {
+        font-size: 15px;
+        border-radius: 5px;
+        background-color: white;
+        box-shadow: 3px 3px 3px rgb(100, 100, 100);
+        text-decoration: none;
+        padding: 1px 10px;
+        color: rgb(66, 118, 247);
+        font-weight: bold;
+        position: absolute;
+        right: 10px;
+        top: 7px;
+        margin: 0px;
+    }
+    #mile_remove {
+        right: 220px;
+        color: rgb(255, 128, 96);
+    }
+    .status {
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: inline-block;
+        margin: auto;
+    }
+    .status-Red {
+        background-color: rgb(254, 112, 75);
+    }
+    .status-Yellow {
+        background-color: rgb(252, 228, 108);
+    }
+    .status-Blue {
+        background-color: rgb(12, 162, 25);
+    }
+    #gantt_container {
+        height: 300px;
+        overflow-x: auto;
+    }
+    .header {
+        height: 60px;
+        background-color: rgb(25, 98, 155);
+        color: white;
+    }
+    .action-info, .mile-info {
+        background-color: rgb(220, 238, 255);
+    }
+    .action-info .action-name {
+        padding-left: 20px;
+    }
+    .phase-info {
+        background-color: rgb(91, 177, 255);
+    }
+    .action-table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    .action-table td, .action-table th {
+        border: 2px solid rgb(209, 227, 246);
+        padding: 3px;
+    }
+    .action-table td {
+        height: 30px;
+    }
+    .bar-container {
+        height: 60px;
+        width: 580px;
+        display: inline-block;
+        position: relative;
+        overflow: hidden;
+        background-color: white;
+    }
+    .gantt-inner {
+        width: 1420px;
+    }
+    .action-table-container {
+        display: inline-block;
+        width: 400px;
+    }
+    .milestone-bar {
+        transform: rotate(45deg);
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border: 1px solid black;
+    }
+    .action-bar {
+        position: absolute;
+        height: 10px;
+        z-index: 10000;
+        border-radius: 5px;
+    }
+    .action-bar.selected, .milestone-bar.selected {
+        border: 2px solid black;
+    }
+    .phase-bar {
+        position: absolute;
+        height: 5px;
+        z-index: 10000;
+        background-color: gray;
+    }
+    .milestone-name, .milestone-name:focus {
+        border: 1px solid white;
+        outline: none;
+        background-color: transparent;
+        padding: 2px;
+        font-size: 12px;
+        color: white;
+        position: absolute;
+        right: 70px;
+        margin: 0px;
+        top: 7px;
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block info_body %}
+<div class="info">
+    <div class="my-header yellow">
+        Jobs
+        {% if user.userprofile.usertype == 'Manager' %}
+            <a href="{% url 'addjob' %}" class="link-but">+ New Job</a>
+        {% endif %}
+    </div>
+    <div style="height: 200px; overflow-y: auto;"> <!-- Job -->
+        <table id="job_table">
+            <tr>
+                <th></th>
+                <th>Manager Name</th>
+                <th>Date Due</th>
+                <th>Status</th>
+            </tr>
+            {% for job in jobs %}
+            <tr onclick="showJobSchedule({{ job.pk }});" id="job_{{ job.pk }}">
+                <td>{{ job.name }}</td>
+                <td></td>
+                <td>{{ job.due|date:"d/m/Y" }}</td>
+                <td>
+                    <div class="status status-{% if job.red_cnt %}Red{% elif job.yellow_cnt %}Yellow{% else %}Blue{% endif %}"></div>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div class="my-header blue" style="margin-top: 20px;">
+        SCHEDULE
+        <button class="milestone-but" id="mile_new">+New Milestone</button>
+        <button class="milestone-but" id="mile_save" style="display: none;">Save</button>
+        <button class="milestone-but" id="mile_remove" style="display: none;">Remove</button>
+        <input type="text" class="milestone-name">
+    </div> <!-- Schedule -->
+    <div id="gantt_container">
+        <div class="gantt-inner">
+            <div class="action-table-container">
+                <table class="action-table">
+                    <tr class="header">
+                        <th>Action name</th>
+                        <th>Duration</th>
+                        <th>Start</th>
+                        <th>End</th>
+                    </tr>
+                </table>
+            </div>
+            <div class="bar-container">
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block info_script %}
+<script src="{% static 'js/moment.min.js' %}"></script>
+<script src="{% static 'js/homepage.js' %}"></script>
+<script>
+    const usertype = '{{ user.userprofile.usertype }}';
+    const user_id = {{ user.pk }};
+    const jobs = [ // job信息
+        {% for job in jobs %}
+        {
+            name: '{{ job.name }}',
+            pk: {{ job.pk }},
+            manager_id: [],
+            manager_name: [],
+            client_id: [],
+            url: '{% url 'jobdetail' job.pk %}'
+        },
+        {% endfor %}
+    ];
+    const jobmanagers = [
+        {% for jm in jobmanagers %}
+        {
+            job_id: {{ jm.job_id }},
+            manager_id: {{ jm.manager_id }},
+            manager_name: '{{ jm.manager.username }}'
+        },
+        {% endfor %}
+    ];
+    const jobclients = [
+        {% for jc in jobclients %}
+        {
+            job_id: {{ jc.job_id }},
+            client_id: {{ jc.client_id }}
+        },
+        {% endfor %}
+    ];
+    for (let job of jobs) {
+        for (let jm of jobmanagers) {
+            if (job.pk === jm.job_id) {
+                job.manager_id.push(jm.manager_id);
+                job.manager_name.push(jm.manager_name);
+            }
+        }
+        for (let jc of jobclients) {
+            if (job.pk === jc.job_id) {
+                job.client_id.push(jc.client_id);
+            }
+        }
+    }
+    const phases = [
+        {% for phase in phases %}
+        {
+            pk: {{ phase.pk }},
+            name: '{{ phase.name}}'
+        },
+        {% endfor %}
+    ];
+    const actions = [ // action信息
+        {% for action in actions %}
+        {
+            pk: {{ action.pk }},
+            name: '{{ action.name }}',
+            job_id: {{ action.job_id }},
+            start_date: '{{ action.start_date|date:"Y-m-d" }}',
+            due_date: '{{ action.due_date|date:"Y-m-d" }}',
+            person_in_charge: [],
+            status: '{{ action.status }}',
+            url: '{% url 'actiondetail' action.pk %}',
+            milestone: '{{ action.milestone|default:'' }}',
+            phase_id: {{ action.phase.pk }},
+            mine: false
+        },
+        {% endfor %}
+    ];
+    const actionmembers = [
+        {% for am in actionmembers %}
+        {
+            action_id: {{ am.action_id }},
+            member_id: {{ am.person_in_charge_id }}
+        },
+        {% endfor %}
+    ];
+    for (let action of actions) {
+        for (let am of actionmembers) {
+            if (action.pk === am.action_id) {
+                action.person_in_charge.push(am.member_id);
+            }
+        }
+    }
+    console.log(actions);
+    console.log(jobs);
+    for (let job of jobs) {
+        $(`#job_${job.pk} td:nth-child(2)`).html(job.manager_name.join(', '));
+    }
+    const action_details = [ // It is used to draw the data of the Gantt chart of action timestamp of start_date  and due_date
+        {% for det in action_details %}
+        {
+            start: {{ det.start }},
+            end: {{ det.end }}
+        },
+        {% endfor %}
+    ];
+    for (let i = 0; i < actions.length; i++) {
+        actions[i].det = action_details[i];
+    }
+    console.log(action_details);
+    for (let i = 0; i < jobs.length; i++) {
+        const job = jobs[i];
+        if (usertype === 'Manager' && !(user_id in job.manager_id || user_id == job.manager_id)) {
+            $(`#job_${job.pk}`).css("display", "none");
+            continue;
+        }
+        if (usertype === 'Client' && !(user_id in job.client_id || user_id == job.client_id)) {
+            $(`#job_${job.pk}`).css("display", "none");
+            continue;
+        }
+        if (usertype === 'Team Member') {
+            let found = false;
+            for (let action of actions) {
+                if (action.job_id === job.pk) {
+                    if (user_id in action.person_in_charge || user_id == action.person_in_charge) {
+                        found = true;
+                        action.mine = true;
+                        // break;
+                    }
+                }
+            }
+            if (!found) {
+                $(`#job_${job.pk}`).css("display", "none");
+                continue;
+            }
+        }
+        if (usertype === 'Manager' || usertype === 'Client') {
+            for (let action of actions) {
+                if (action.job_id === job.pk) {
+                    action.mine = true;
+                }
+            }
+        }
+    }
+    showActionBar(i, st_pos - 1, act.det.start, act.det.end, act.status, act.milestone);
+    const showActionBar = (idx, day_st, st, ed, col) => { // Showing action in Gantt chart
+        const ele = $(`
+            <div style="
+                top: ${idx * 30 + 60 + 10}px;
+                left: ${20 * (st - day_st)}px;
+                width: ${20 * (ed - st) + 20}px;"
+                class="status-${col} action-bar"
+                onclick="actionBarSelected(${idx})"
+            ></div>`);
+        $(".bar-container").append(ele);
+    };
+    const showPhaseBar = (idx, day_st, st, ed) => {
+        console.log(day_st, st, ed);
+        const ele = $(`
+            <div style="
+                top: ${idx * 30 + 60 + 12}px;
+                left: ${20 * (st - day_st)}px;
+                width: ${20 * (ed - st) + 20}px;"
+                class="phase-bar"
+            ></div>`);
+        $(".bar-container").append(ele);
+    }
+    const showMilestone = (idx, day_st, pos) => {
+        const ele = $(`
+            <div style="
+                top: ${idx * 30 + 60 + 10}px;
+                left: ${20 * (pos - day_st) + 25}px;"
+                class="milestone-bar"
+                onclick="actionBarSelected(${idx-1})"
+            ></div>`);
+        $(".bar-container").append(ele);
+    }
+
+    // showWeekDay((st_pos + 3) % 7, ed_pos - st_pos + 2, show_actions.length);
+    const showWeekDay = (st, cnt, h) => { // Display M T W T F S S on the Gantt chart
+        const wds = "MTWTFSS";
+        for (let i = 0; i < cnt; i++) {
+            const wd = (st + i) % 7;
+            const ele = $(`
+                <div style="
+                    position: absolute;
+                    border-right: 2px solid rgb(220, 220, 220);
+                    width: 20px;
+                    height: ${h * 30 + 30}px;
+                    top: 30px;
+                    left: ${i * 20}px;
+                    background-color: ${ wd > 4 ? "rgb(220, 220, 220)" : "transparent" }"
+                >
+                    <div style="
+                        width: 100%;
+                        height: 30px;
+                        text-align: center;
+                        padding-top: 5px;
+                        background-color: ${ wd > 4 ? "rgb(106, 185, 255)" : "rgb(220, 238, 255)" };"
+                    >
+                        ${wds[wd]}
+                    </div>
+                </div>
+            `);
+            $(".bar-container").append(ele);
+        }
+    };
+
+    // showBarDate(st_pos - 1, ed_pos - st_pos + 2);
+    const showBarDate = (st, len) => { // Display the Date on the Gantt chart
+        const ele = $(`
+            <div style="
+                width: ${len * 20}px;
+                height: 30px;
+                top: 0px;
+                left: 0px;
+                background-color: rgb(25, 98, 155)"
+            >
+            </div>
+        `);
+        // console.log(moment(st * 24 * 3600 * 1000).format("YYYY-MM-DD"));
+        for (let i = 0; i < len; i++) {
+            const t = moment((i + st + 1) * 24 * 3600 * 1000);
+            if (t.weekday() == 1) {
+                ele.append(`
+                    <div style="
+                        position: absolute;
+                        left: ${i * 20 + 3}px;
+                        top: 5px;
+                        color: white;
+                    ">${t.format("YYYY-MM-DD")}
+                    </div>
+                `);
+            }   
+        }
+        $(".bar-container").append(ele);
+    };
+
+    let show_actions = [];
+    let selected_idx = 0;
+    let job_id;
+    const showJobSchedule = (id) => { // If click Job, the action information and Gantt chart of the job will be displayed
+        job_id = id;
+        $(".bar-container").html("");
+        let st_pos = 0, ed_pos = 0;
+        show_actions = [];
+        $(".action-info").remove();
+        $(".phase-info").remove();
+        for (let phase of phases) {
+            const phase_actions = [];
+            let phase_start = 0, phase_end = 0, phase_start_date, phase_due_date;
+            let phase_node;
+            for (let action of actions) {
+                if (!action.mine) continue;
+                if (action.job_id !== id) continue;
+                if (action.phase_id !== phase.pk) continue;
+                if (phase_start == 0) {
+                    phase_node = {
+                        type: 'phase'
+                    };
+                    show_actions.push(phase_node);
+                }
+                show_actions.push(action);
+                if (action.milestone) {
+                    show_actions.push({
+                        pos: action.det.end,
+                        type: 'milestone'
+                    })
+                }
+                if (st_pos == 0 || st_pos > action.det.start)
+                    st_pos = action.det.start;
+                if (ed_pos < action.det.end)
+                    ed_pos = action.det.end;
+                if (phase_start == 0 || phase_start > action.det.start) {
+                    phase_start = action.det.start;
+                    phase_start_date = action.start_date;
+                }
+                if (phase_end < action.det.end) {
+                    phase_end = action.det.end;
+                    phase_due_date = action.due_date;
+                }
+                phase_actions.push(action);
+            }
+            if (phase_actions.length) {
+                phase_node.start = phase_start;
+                phase_node.end = phase_end;
+                $(".action-table").append(`
+                    <tr class="phase-info">
+                        <td class="action-name">${phase.name}</td>
+                        <td class="action-duration">${phase_end - phase_start + 1} days</td>
+                        <td class="action-start">${phase_start_date}</td>
+                        <td class="action-end">${phase_due_date}</td>
+                    </tr>
+                `);
+            }
+            for (let action of phase_actions) {
+                $(".action-table").append(`
+                    <tr class="action-info">
+                        <td class="action-name">${action.name}</td>
+                        <td class="action-duration">${action.det.end - action.det.start + 1} days</td>
+                        <td class="action-start">${action.start_date}</td>
+                        <td class="action-end">${action.due_date}</td>
+                    </tr>
+                `);
+                if (action.milestone) {
+                    $(".action-table").append(`
+                        <tr class="action-info">
+                            <td class="action-name">&nbsp;&nbsp;&nbsp;${action.milestone}</td>
+                            <td class="action-duration"></td>
+                            <td class="action-start"></td>
+                            <td class="action-end"></td>
+                        </tr>
+                    `);
+                }
+            }
+        }
+        console.log(show_actions);
+        showWeekDay((st_pos + 3) % 7, ed_pos - st_pos + 2, show_actions.length);
+        showBarDate(st_pos - 1, ed_pos - st_pos + 2);
+        for (let i = 0; i < show_actions.length; i++) {
+            const act = show_actions[i];
+            if (act.type === 'phase') {
+                showPhaseBar(i, st_pos - 1, act.start, act.end);
+            }
+            else if (act.type === 'milestone') {
+                showMilestone(i, st_pos, act.pos);
+            }
+            else
+                showActionBar(i, st_pos - 1, act.det.start, act.det.end, act.status, act.milestone);
+        }
+        $(".bar-container").css("height", `${30 * show_actions.length + 60}px`).css("width", `${20 * (ed_pos - st_pos) + 40}px`);
+        gantt_width = 20 * (ed_pos - st_pos) + 40;
+        console.log(gantt_width);
+        if (gantt_width < 500) {
+            $(".action-table-container").css("width", `${980 - gantt_width}px`);
+        }
+        else {
+            $(".action-table-container").css("width", `400px`);
+        }
+        $(".gantt-inner").css("width", `${20 * (ed_pos - st_pos) + 450 > 1000 ? 20 * (ed_pos - st_pos) + 450 : 1000}px`);
+    }
+
+    const actionBarSelected = (idx) => {
+        console.log(idx, show_actions[idx].milestone);
+        selected_idx = idx;
+        $(".action-bar").removeClass("selected");
+        $(".milestone-bar").removeClass("selected");
+        $($("[class*='-bar']")[idx]).addClass("selected");
+        if (show_actions[idx].milestone) {
+            $($("[class*='-bar']")[idx+1]).addClass("selected");
+            $(".milestone-name").css("display", "block").val(show_actions[idx].milestone);
+            $("#mile_save").css("display", "block");
+            $("#mile_remove").css("display", "block");
+            $("#mile_new").css("display", "none");
+        }
+        else {
+            $(".milestone-name").css("display", "none");
+            $("#mile_save").css("display", "none");
+            $("#mile_remove").css("display", "none");
+            $("#mile_new").css("display", "block");
+        }
+    };
+    $("#mile_save").click(() => {
+        console.log(selected_idx);
+        const name = $(".milestone-name").val();
+        show_actions[selected_idx].milestone = name;
+        showJobSchedule(job_id);
+        $.post(location.href, {
+            pk: show_actions[selected_idx].pk,
+            milestone: name
+        }, () => {
+
+        });
+    });
+    $("#mile_remove").click(() => {
+        console.log(selected_idx);
+        show_actions[selected_idx].milestone = '';
+        showJobSchedule(job_id);
+        $.post(location.href, {
+            pk: show_actions[selected_idx].pk,
+            milestone: ''
+        }, () => {
+
+        });
+    });
+    $("#mile_new").click(() => {
+        console.log(selected_idx);
+        show_actions[selected_idx].milestone = "Milestone";
+        actionBarSelected(selected_idx);
+        show_actions[selected_idx].milestone = '';
+    });
+</script>
+{% endblock %}

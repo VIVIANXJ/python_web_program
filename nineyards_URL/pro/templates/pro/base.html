@@ -1,0 +1,181 @@
+{% load static %}
+<!-- Project general html template -->
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+        <style>
+            @font-face {
+                font-family: global_font;
+                src: url({% static 'fonts/calibri.ttf' %});
+            }
+            body {
+                background-color: rgb(241, 241, 241);
+            }
+            * {
+                font-family: global_font;
+                box-sizing: border-box;
+            }
+            .full-container {
+                display: flex;
+                position: fixed;
+                left: 0px;
+                top: 0px;
+                width: 100%;
+                height: 100%;
+                justify-content: center;
+                align-items: center;
+                background-color: #ffffff;
+            }
+            .full-container > div {
+                display: grid;
+                grid-template-columns: auto auto;
+                grid-gap: 20px;
+            }
+            input, select {
+                font-size: 20px;
+                font-weight: bold;
+                margin: 10px;
+                border: 3px solid rgb(168, 168, 168);
+                color: rgb(168, 168, 168);
+                border-radius: 5px;
+                background-color: rgb(243, 243, 243);
+                padding: 8px;
+            }
+            option {
+                background-color: white;
+                color: black;
+            }
+            option:hover {
+                background-color: rgb(241, 241, 241);
+            }
+            button, .close-link {
+                text-decoration: none;
+                border-radius: 5px;
+                box-shadow: 3px 3px 3px rgb(100, 100, 100);
+                color: white;
+                font-size: 20px;
+                padding: 8px;
+                border: none;
+                font-weight: bold;
+                margin: 10px;
+                text-align: center;
+            }
+            .left-pad {
+                background-color: white;
+                width: 250px;
+                height: 800px;
+                padding: 10px;
+                text-align: center;
+                display: none;
+            }
+            .left-pad-logo-container {
+                margin-bottom: 30px;
+            }
+            .left-pad-logo {
+                background-color: rgb(241, 241, 241);
+                border-radius: 5px;
+                display: inline-block;
+                padding: 5px;
+            }
+            .left-pad-logo > img {
+                width: 180px;
+            }
+            .left-pad .three-but {
+                font-weight: bold;
+                display: inline-block;
+                font-size: 25px;
+                background-color: transparent;
+            }
+            .link-container {
+                display: grid;
+                grid-template-columns: 40px 190px;
+                margin: 10px 0px;
+            }
+            .link-container div:nth-child(1) {
+                border-radius: 50%;
+                display: inline-block;
+                width: 30px;
+                height: 30px;
+            }
+            .link-container .link {
+                border-radius: 5px;
+                
+            }
+            .link-container a {
+                padding: 0px;
+                text-decoration: none;
+                color: white;
+                font-weight: bold;
+                font-size: 22px;
+            }
+            .yellow {
+                background-color: rgb(255, 128, 96);
+            }
+            .blue {
+                background-color: rgb(66, 118, 247);
+            }
+            .my-header {
+                color: white;
+                font-weight: bold;
+                font-size: 20px;
+                border-radius: 10px;
+                padding: 5px;
+                width: 100%;
+                text-align: center;
+                box-shadow: 1px 1px 3px rgb(100, 100, 100);
+                position: relative;
+            }
+            .username {
+                font-weight: bold;
+                font-size: 20px;
+                display: inline-block;
+            }
+            .logout {
+                text-decoration: none;
+                font-weight: bold;
+                color: white;
+                background-color: rgb(255, 128, 96);
+                border-radius: 5px;
+                padding: 5px;
+            }
+        </style>
+        {% block head %}{% endblock %}
+    </head>
+    <body>
+        <div class="full-container">
+            <div>
+                <!-- Navigation Bar Start -->
+                <div class="left-pad">
+                    <div class="left-pad-logo-container">
+                        <div class="three-but">&#9776;</div>
+                        <div class="left-pad-logo">
+                            <img src="{% static 'image/logo.png' %}">
+                        </div>
+                    </div>
+                    <div class="link-container">
+                        <div class="yellow"></div>
+                        <div class="link yellow">
+                            <a href="{% url 'homepage' %}">Homepage</a>
+                        </div>
+                    </div>
+                    <div class="link-container">
+                        <div class="blue"></div>
+                        <div class="link blue">
+                            <a href="{% url 'dashboard' %}">Dashboard</a>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="username">{{ user.username }}</div>
+                        <a href="{% url 'logout' %}" class="logout">Log out</a>
+                    </div>
+                </div>
+                <!-- Navigation Bar End -->
+                {% block body %}{% endblock %}
+            </div>
+        </div>
+        <script src="{% static 'js/jquery.min.js' %}"></script>
+        {% block script %}{% endblock %}
+    </body>
+</html>

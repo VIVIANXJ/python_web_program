@@ -1,0 +1,213 @@
+{% extends './info_base.html' %}
+{% load static %}
+
+{% block info_head %}
+<title>Homepage</title>
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<script src="{% static 'js/vue.global.js' %}"></script>
+<style>
+    .info {
+        background-color: rgb(241, 240, 235);
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px;
+        height: 700px;
+    }
+    #job_table {
+        font-weight: bold;
+        border-collapse: collapse;
+        width: 100%;
+    }
+    #job_table td, #job_table th {
+        border: 2px solid #dddddd;
+        text-align: center;
+        padding: 3px;
+    }
+    #job_table th {
+        font-size: 25px;
+    }
+    #job_table td:nth-child(1) {
+        font-size: 25px;
+    }
+    #job_table tr:nth-child(odd) {
+        background-color: rgb(255, 242, 239);
+    }
+    #job_table tr:nth-child(even) {
+        background-color: rgb(254, 197, 183);
+    }
+    .link-but {
+        font-size: 15px;
+        border-radius: 5px;
+        background-color: white;
+        box-shadow: 3px 3px 3px rgb(100, 100, 100);
+        text-decoration: none;
+        padding: 1px 10px;
+        color: rgb(255, 128, 96);
+        font-weight: bold;
+        position: absolute;
+        right: 10px;
+        top: 7px;
+    }
+    .milestone-but {
+        font-size: 15px;
+        border-radius: 5px;
+        background-color: white;
+        box-shadow: 3px 3px 3px rgb(100, 100, 100);
+        text-decoration: none;
+        padding: 1px 10px;
+        color: rgb(66, 118, 247);
+        font-weight: bold;
+        position: absolute;
+        right: 10px;
+        top: 7px;
+        margin: 0px;
+    }
+    #mile_remove {
+        right: 220px;
+        color: rgb(255, 128, 96);
+    }
+    .status {
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: inline-block;
+        margin: auto;
+    }
+    .status-Red {
+        background-color: rgb(254, 112, 75);
+    }
+    .status-Yellow {
+        background-color: rgb(252, 228, 108);
+    }
+    .status-Blue {
+        background-color: rgb(12, 162, 25);
+    }
+    #gantt_container {
+        overflow-x: auto;
+    }
+    .header {
+        height: 60px;
+        background-color: rgb(25, 98, 155);
+        color: white;
+    }
+    .action-info, .mile-info {
+        background-color: rgb(220, 238, 255);
+    }
+    .action-info td:first-child {
+        padding-left: 20px;
+    }
+    .mile-info td:first-child {
+        padding-left: 40px;
+    }
+    .phase-info {
+        background-color: rgb(91, 177, 255);
+    }
+    .action-table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    .action-table td, .action-table th {
+        border: 2px solid rgb(209, 227, 246);
+        padding: 3px;
+    }
+    .action-table td {
+        height: 30px;
+    }
+    .bar-container {
+        height: 60px;
+        width: 580px;
+        display: inline-block;
+        position: relative;
+        overflow: hidden;
+        background-color: white;
+    }
+    .gantt-inner {
+        /* width: 1800px; */
+    }
+    .action-table-container {
+        display: inline-block;
+        width: 500px;
+    }
+    .milestone-bar {
+        transform: rotate(45deg);
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border: 1px solid black;
+    }
+    .action-bar {
+        position: absolute;
+        height: 10px;
+        z-index: 10000;
+        border-radius: 5px;
+    }
+    .action-bar.selected, .milestone-bar.selected {
+        border: 2px solid black;
+    }
+    .phase-bar {
+        position: absolute;
+        height: 5px;
+        z-index: 10000;
+        background-color: gray;
+    }
+    .milestone-name, .milestone-name:focus {
+        border: 1px solid white;
+        outline: none;
+        background-color: transparent;
+        padding: 2px;
+        font-size: 12px;
+        color: white;
+        position: absolute;
+        right: 70px;
+        margin: 0px;
+        top: 7px;
+    }
+    .table-action-name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow:ellipsis;
+        max-width: 150px;
+    }
+    .table-action-name a {
+        text-decoration: none;
+        color: black;
+    }
+</style>
+{% endblock %}
+
+{% block info_body %}
+<div class="info">
+    <div class="my-header yellow">
+        Jobs
+        {% if user.userprofile.usertype == 'Manager' %}
+            <a href="{% url 'addjob' %}" class="link-but">+ New Job</a>
+        {% endif %}
+    </div>
+    <div id="vue-container">
+        <job-table
+            :jobs="jobs"
+            :isman="usertype === 'Manager'"
+            @job-click="jobClick"
+            @job-delete="jobDelete"
+            :expanded="expanded"
+        ></job-table>
+        <gantt-container
+            :phases="phases"
+            :actions="filtered_actions"
+            :expanded="expanded"
+            @change-mile="changeMile"
+            @select="select"
+            @expand="expanded = !expanded"
+        ></gantt-container>
+    </div>
+</div>
+{% endblock %}
+
+{% block info_script %}
+<script src="{% static 'js/moment.min.js' %}"></script>
+<script>
+    const usertype = '{{ user.userprofile.usertype }}';
+    const user_id = {{ user.pk }};
+</script>
+<script src="{% static 'js/homepage.js' %}"></script>
+{% endblock %}

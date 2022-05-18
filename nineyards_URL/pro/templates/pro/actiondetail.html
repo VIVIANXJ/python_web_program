@@ -1,0 +1,94 @@
+{% extends './info_base.html' %}
+{% load static %}
+
+{% block info_head %}
+<title>ActionDetail</title>
+<style>
+    .info-title {
+        background-color: rgb(196, 196, 196);
+        border-radius: 10px;
+        padding: 5px 50px;
+        font-weight: bold;
+        font-size: 25px;
+        display: inline-block;
+        transform: translateY(-20px);
+    }
+    .content-center {
+        text-align: center;
+        padding: 10px;
+    }
+    .action-body {
+        background-color: rgb(245, 243, 240);
+        border-radius: 20px;
+        padding: 20px;
+        font-size: 20px;
+        text-align: left;
+    }
+    .action-body > div > div > div {
+        margin-top: 20px;
+    }
+    .status {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;        
+        display: inline-block;
+        transform: translateY(8px);
+    }
+    .status-Red {
+        background-color: rgb(254, 112, 75);
+    }
+    .status-Yellow {
+        background-color: rgb(252, 228, 108);
+    }
+    .status-Blue {
+        background-color: rgb(12, 162, 25);
+    }
+    .action-description {
+        background-color: rgb(229, 227, 225);
+        border-radius: 20px;
+        padding: 20px 10px;
+        width: 100%;
+        height: 350px;
+        margin-top: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block info_body %}
+<div class="content-center">
+    <div class="info-title">
+        <span style="color: rgb(255, 101, 59)">A</span>ction <span style="color: rgb(65, 118, 247)">I</span>nformation
+    </div>
+    <div class="action-body">
+        <div style="display: flex; align-items: stretch;">
+            <div style="flex-grow: 3">
+                <div style="font-size: 35px; margin-top: 0px;"><b>Action name:</b> {{ action.name }}</div>
+                <div><b>Category:</b> {{ action.category.name }}</div>
+                <div><b>Phase name:</b> {{ action.phase.name }}</div>
+                <div><b>Person in charge:</b>
+                    {% for v in members %}
+                        {{ v.person_in_charge.userprofile.firstname }} {{ v.person_in_charge.userprofile.lastname }}&nbsp;&nbsp;
+                    {% endfor %}
+                </div>
+                <div><b>Action Description:</b></div>
+            </div>
+            <div style="align-self: center; flex-grow: 1; text-align: right;">
+                <div><b>Start time:</b> {{ action.start_date|date:"d/m/Y" }}</div>
+                <div><b>Due date:</b> {{ action.due_date|date:"d/m/Y" }}</div>
+                <div><b>Status:</b>
+                    <div class="status status-{{ action.status }}"></div>
+                </div>
+            </div>
+        </div>
+        <div class="action-description">
+            <pre>{{ action.description }}</pre>
+        </div>
+        <div style="text-align: center; padding-top: 20px;">
+            <a href="{% url 'jobdetail' action.job.pk %}" class="close-link blue">Close</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block info_script %}
+{% endblock %}

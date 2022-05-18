@@ -1,0 +1,138 @@
+{% extends './info_base.html' %}
+{% load static %}
+
+{% block info_head %}
+<!-- Add comment page -->
+<title>Add Comment</title>
+<style>
+    .info-title {
+        background-color: rgb(196, 196, 196);
+        border-radius: 10px;
+        padding: 5px 50px;
+        font-weight: bold;
+        font-size: 25px;
+        display: inline-block;
+        transform: translateY(-20px);
+    }
+    .comment-container {
+        height: 300px;
+        overflow-y: auto;
+        margin: 10px;
+    }
+    #comment_content {
+        border: 3px solid rgb(165, 160, 160);
+        border-radius: 20px;
+        width: 1000px;
+        height: 120px;
+        padding: 20px;
+    }
+    #comment_content:focus {
+        outline: none;
+    }
+    .content-center {
+        text-align: center;
+        padding: 10px;
+    }
+    .my-header {
+        background-color: rgb(196, 196, 196);
+        text-align: left;
+    }
+    .comment {
+        display: flex;
+        margin: 10px;
+        align-items: stretch;
+        font-size: 20px;
+    }
+    .comment-user {
+        width: 150px;
+        padding: 10px;
+    }
+    .comment-content {
+        width: 700px;
+    }
+    .comment-content pre {
+        margin: 5px;
+    }
+    .comment-user, .comment-content {
+        background-color: rgb(237, 238, 238);
+        text-align: left;
+    }
+    .comment-date {
+        padding: 10px;
+        align-self: center;
+    }
+    .small-but {
+        font-size: 15px;
+        padding: 3px 10px;
+        border-radius: 10px;
+        margin: 5px;
+        box-shadow: none;
+    }
+</style>
+{% endblock %}
+
+{% block info_body %}
+<div class="content-center">
+    <div class="info-title">
+        <span style="color: rgb(255, 101, 59)">C</span>omments <span style="color: rgb(65, 118, 247)">B</span>oard
+    </div>
+    <form method="post">
+        <textarea name="content" id="comment_content"></textarea>
+        <div style="text-align: right; padding-right: 50px;">
+            <button type="submit" class="yellow">Submit</button>
+        </div>
+    </form>
+    <div class="my-header">{{ comments|length }} Comment(s)</div>
+    <div class="comment-container">
+    {% for comment in comments %}
+        <div class="comment" id="comment_{{ comment.pk}}">
+            <div class="comment-user">
+                {{ comment.user.username }}
+            </div>
+            <div class="comment-content">
+                <pre>{{ comment.content }}</pre>
+                {% if comment.user == user %}
+                <div style="float: right;">
+                    <button class="small-but yellow" onclick="editComment({{ comment.pk }});">Edit</button>
+                    <button class="small-but yellow" onclick="saveComment({{ comment.pk }});">Save</button>
+                </div>
+                {% endif %}
+            </div>
+            <div class="comment-date">
+                {{ comment.date|date:"d-m-Y" }}
+                {% if comment.user == user %}
+                    <span url="{% url 'deletecomment' comment.pk %}" class="delete_comment"><fa class="fa fa-trash-o"></fa></span>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+    <div style="text-align: center; padding-top: 20px;">
+        <a href="{% url 'jobdetail' action.job.pk %}" class="close-link blue">Close</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block info_script %}
+<script>
+    $(".delete_comment").click(function() { // 删除评论
+        $.get($(this).attr("url"), () => {
+            location.reload();
+        })
+    });
+
+    const editComment = (pk) => { // 编辑评论
+        $(`#comment_${pk} pre`).attr("contenteditable", true);
+    };
+
+    const saveComment = (pk) => { // 保存评论
+        $(`#comment_${pk} pre`).removeAttr("contenteditable");
+        $.post(location.href, {
+            pk: pk,
+            content: $(`#comment_${pk} pre`).html()
+        }, () => {
+
+        });
+    };
+</script>
+{% endblock %}
