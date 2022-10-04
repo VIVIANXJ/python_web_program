@@ -17,4 +17,5 @@ urlpatterns = [
     path('deletecomment/<int:pk>', DeleteComment, name='deletecomment'),
     path('phasetemplate', PhaseTemplate, name='phasetemplate'),
     path('editaction/<int:pk>', ActionEdit, name='editaction')
+    path('NetworkSim',name='NetworkSim')
 ]
